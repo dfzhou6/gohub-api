@@ -21,6 +21,7 @@ func main() {
 	config.InitConfig(env)
 
 	r := gin.New()
+	bootstrap.SetupDB()
 	bootstrap.SetupRoute(r)
 	err := r.Run(":" + config.Get("app.port"))
 	if err != nil {
