@@ -22,7 +22,7 @@ func registerGlobalMiddleware(route *gin.Engine) {
 	// 注册中间件
 	route.Use(
 		middlewares.Logger(),
-		gin.Recovery(),
+		middlewares.Recovery(),
 	)
 }
 
