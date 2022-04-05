@@ -26,6 +26,7 @@ func main() {
 	bootstrap.SetupDB()
 	bootstrap.SetupRedis()
 	bootstrap.SetupRoute(r)
+
 	err := r.Run(":" + config.Get("app.port"))
 	if err != nil {
 		fmt.Println(err.Error())
