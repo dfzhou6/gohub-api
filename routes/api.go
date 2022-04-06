@@ -2,6 +2,7 @@ package routes
 
 import (
 	"gohub/app/http/controllers/api/v1/auth"
+	"gohub/app/http/middlewares"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,7 @@ import (
 
 func RegisterAPIRoutes(r *gin.Engine) {
 	v1 := r.Group("v1")
+	v1.Use(middlewares.LimitIP("100-H"))
 	{
 		v1.GET("/", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
@@ -17,26 +19,27 @@ func RegisterAPIRoutes(r *gin.Engine) {
 		})
 
 		authGroup := v1.Group("auth")
+		authGroup.Use(middlewares.LimitIP("200-H"))
 		{
 			signUpCtl := new(auth.SignUpController)
-			authGroup.POST("/signup/phone/exist", signUpCtl.IsPhoneExist)
-			authGroup.POST("/signup/email/exist", signUpCtl.IsEmailExist)
-			authGroup.POST("/signup/using-phone", signUpCtl.SignupUsingPhone)
-			authGroup.POST("/signup/using-email", signUpCtl.SignupUsingEmail)
+			authGroup.POST("/signup/phone/exist", middlewares.GuestJWT(), middlewares.LimitPerRoute("60-H"), signUpCtl.IsPhoneExist)
+			authGroup.POST("/signup/email/exist", middlewares.GuestJWT(), middlewares.LimitPerRoute("60-H"), signUpCtl.IsEmailExist)
+			authGroup.POST("/signup/using-phone", middlewares.GuestJWT(), signUpCtl.SignupUsingPhone)
+			authGroup.POST("/signup/using-email", middlewares.GuestJWT(), signUpCtl.SignupUsingEmail)
 
 			verifyCodeCtl := new(auth.VerifyCodeController)
-			authGroup.POST("/verify-codes/captcha", verifyCodeCtl.ShowCaptcha)
-			authGroup.POST("/verify-codes/phone", verifyCodeCtl.SendUsingPhone)
-			authGroup.POST("/verify-codes/email", verifyCodeCtl.SendUsingEmail)
+			authGroup.POST("/verify-codes/captcha", middlewares.LimitPerRoute("50-H"), verifyCodeCtl.ShowCaptcha)
+			authGroup.POST("/verify-codes/phone", middlewares.LimitPerRoute("20-H"), verifyCodeCtl.SendUsingPhone)
+			authGroup.POST("/verify-codes/email", middlewares.LimitPerRoute("20-H"), verifyCodeCtl.SendUsingEmail)
 
 			loginCtl := new(auth.LoginController)
-			authGroup.POST("/login/using-phone", loginCtl.LoginByPhone)
-			authGroup.POST("/login/using-password", loginCtl.LoginByPassword)
-			authGroup.POST("/login/refresh-token", loginCtl.RefreshToken)
+			authGroup.POST("/login/using-phone", middlewares.GuestJWT(), loginCtl.LoginByPhone)
+			authGroup.POST("/login/using-password", middlewares.GuestJWT(), loginCtl.LoginByPassword)
+			authGroup.POST("/login/refresh-token", middlewares.AuthJWT(), loginCtl.RefreshToken)
 
 			pwdCtl := new(auth.PasswordController)
-			authGroup.POST("/password-reset/using-phone", pwdCtl.ResetByPhone)
-			authGroup.POST("/password-reset/using-email", pwdCtl.ResetByEmail)
+			authGroup.POST("/password-reset/using-phone", middlewares.GuestJWT(), pwdCtl.ResetByPhone)
+			authGroup.POST("/password-reset/using-email", middlewares.GuestJWT(), pwdCtl.ResetByEmail)
 		}
 
 	}
