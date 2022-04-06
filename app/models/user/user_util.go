@@ -26,3 +26,8 @@ func GetByMulti(loginID string) (user User) {
 		First(&user)
 	return
 }
+
+func Get(idStr string) (user User) {
+	database.DB.Where("id", idStr).First(&user)
+	return
+}

@@ -3,6 +3,9 @@ package auth
 import (
 	"errors"
 	"gohub/app/models/user"
+	"gohub/pkg/logger"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Attempt(loginID string, password string) (user.User, error) {
@@ -22,4 +25,18 @@ func LoginByPhone(phone string) (user.User, error) {
 		return user.User{}, errors.New("手机号未注册")
 	}
 	return userModel, nil
+}
+
+func CurrentUser(c *gin.Context) user.User {
+	_user, ok := c.MustGet("current_user").(user.User)
+	if !ok {
+		logger.LogIf(errors.New("无法获取用户"))
+		return user.User{}
+	}
+
+	return _user
+}
+
+func CurrentUID(c *gin.Context) string {
+	return c.GetString("current_user_id")
 }
