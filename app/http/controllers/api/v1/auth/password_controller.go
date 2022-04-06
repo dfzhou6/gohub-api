@@ -29,3 +29,20 @@ func (ctl *PasswordController) ResetByPhone(c *gin.Context) {
 		response.Success(c)
 	}
 }
+
+func (ctl *PasswordController) ResetByEmail(c *gin.Context) {
+	request := requests.ResetByEmailRequest{}
+	if ok := requests.Validate(c, &request, requests.ResetByEmail); !ok {
+		return
+	}
+
+	_user := user.GetByEmail(request.Email)
+	if _user.ID == 0 {
+		response.Abort404(c)
+	} else {
+		_user.Password = request.Password
+		_user.Save()
+
+		response.Success(c)
+	}
+}
