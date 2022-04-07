@@ -35,7 +35,7 @@ func InitConfig(env string) {
 
 func loadEnv(envSubfix string) {
 	envPath := ".env"
-	if len(envPath) > 0 {
+	if len(envSubfix) > 0 {
 		filePath := ".env." + envSubfix
 		if _, err := os.Stat(filePath); err == nil {
 			envPath = filePath

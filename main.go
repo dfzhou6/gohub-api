@@ -1,13 +1,15 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"gohub/app/cmd"
 	"gohub/bootstrap"
 	bstConfig "gohub/config"
 	"gohub/pkg/config"
+	"gohub/pkg/console"
+	"os"
 
-	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -15,20 +17,27 @@ func init() {
 }
 
 func main() {
-	var env string
-	flag.StringVar(&env, "env", "", "加载 .env 文件，如 --env=testing 加载的是 .env.testing 文件")
-	flag.Parse()
-	config.InitConfig(env)
-	bootstrap.SetupLogger()
-	gin.SetMode(gin.ReleaseMode)
+	var rootCmd = &cobra.Command{
+		Use:   config.Get("app.name"),
+		Short: "A simple forum project",
+		Long: `Default will run "serve" command, you can use "-h" flag to see
+		 all subcommands`,
+		PersistentPreRun: func(command *cobra.Command, args []string) {
+			config.InitConfig(cmd.Env)
+			bootstrap.SetupLogger()
+			bootstrap.SetupDB()
+			bootstrap.SetupRedis()
+		},
+	}
 
-	r := gin.New()
-	bootstrap.SetupDB()
-	bootstrap.SetupRedis()
-	bootstrap.SetupRoute(r)
+	rootCmd.AddCommand(
+		cmd.CmdServe,
+	)
 
-	err := r.Run(":" + config.Get("app.port"))
-	if err != nil {
-		fmt.Println(err.Error())
+	cmd.RegisterDefaultCmd(rootCmd, cmd.CmdServe)
+	cmd.RegisterGlobalFlags(rootCmd)
+
+	if err := rootCmd.Execute(); err != nil {
+		console.Exit(fmt.Sprintf("Failed to run app with %v: %s", os.Args, err.Error()))
 	}
 }
