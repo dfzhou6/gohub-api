@@ -35,6 +35,7 @@ func init() {
 		CmdMakeAPIController,
 		CmdMakeRequest,
 		CmdMakePolicy,
+		CmdMakeMigration,
 	)
 }
 
