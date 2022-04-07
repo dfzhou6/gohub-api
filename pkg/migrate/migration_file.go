@@ -23,3 +23,21 @@ func Add(name string, up, down migrationFunc) {
 		FileName: name,
 	})
 }
+
+func getMigrationFile(name string) MigrationFile {
+	for _, mfile := range migrationFiles {
+		if mfile.FileName == name {
+			return mfile
+		}
+	}
+	return MigrationFile{}
+}
+
+func (mf *MigrationFile) isNotMigrated(migrations []Migration) bool {
+	for _, migration := range migrations {
+		if migration.Migration == mf.FileName {
+			return false
+		}
+	}
+	return true
+}

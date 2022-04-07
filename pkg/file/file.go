@@ -3,6 +3,8 @@ package file
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func Exists(fileToCheck string) bool {
@@ -18,4 +20,8 @@ func Put(data []byte, to string) error {
 		return err
 	}
 	return nil
+}
+
+func FileNameWithoutExtension(fileName string) string {
+	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }

@@ -1,7 +1,10 @@
 package migrate
 
 import (
+	"gohub/pkg/console"
 	"gohub/pkg/database"
+	"gohub/pkg/file"
+	"io/ioutil"
 
 	"gorm.io/gorm"
 )
@@ -33,5 +36,66 @@ func (m *Migrator) createMigrationsTable() {
 	migration := Migration{}
 	if !m.GMigrator.HasTable(&migration) {
 		m.GMigrator.CreateTable(&migration)
+	}
+}
+
+func (m *Migrator) readAllMigrationFiles() []MigrationFile {
+	files, err := ioutil.ReadDir(m.Folder)
+	console.ExitIf(err)
+
+	var migrationFiles []MigrationFile
+	for _, f := range files {
+		fileName := file.FileNameWithoutExtension(f.Name())
+		mfile := getMigrationFile(fileName)
+		if len(mfile.FileName) > 0 {
+			migrationFiles = append(migrationFiles, mfile)
+		}
+	}
+
+	return migrationFiles
+}
+
+func (m *Migrator) runUpMigration(mfile MigrationFile, batch int) {
+	if mfile.Up != nil {
+		console.Warning("migrating " + mfile.FileName)
+		mfile.Up(m.GMigrator, database.SQLDB)
+		console.Success("migrated " + mfile.FileName)
+	}
+
+	err := m.DB.Create(&Migration{
+		Migration: mfile.FileName,
+		Batch:     batch,
+	}).Error
+
+	console.ExitIf(err)
+}
+
+func (m *Migrator) getBatch() int {
+	batch := 1
+	lastMigration := Migration{}
+	m.DB.Order("id desc").First(&lastMigration)
+	if lastMigration.ID > 0 {
+		batch = lastMigration.Batch + 1
+	}
+	return batch
+}
+
+func (m *Migrator) Up() {
+	migrationFiles := m.readAllMigrationFiles()
+	batch := m.getBatch()
+
+	migrations := []Migration{}
+	m.DB.Find(&migrations)
+
+	runed := false
+	for _, mfile := range migrationFiles {
+		if mfile.isNotMigrated(migrations) {
+			m.runUpMigration(mfile, batch)
+			runed = true
+		}
+	}
+
+	if !runed {
+		console.Success("database is up to date.")
 	}
 }

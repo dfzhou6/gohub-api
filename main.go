@@ -35,6 +35,7 @@ func main() {
 		cmd.CmdServe,
 		cmd.CmdKey,
 		make.CmdMake,
+		cmd.CmdMigrate,
 	)
 
 	cmd.RegisterDefaultCmd(rootCmd, cmd.CmdServe)
