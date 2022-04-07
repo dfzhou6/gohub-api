@@ -99,3 +99,31 @@ func (m *Migrator) Up() {
 		console.Success("database is up to date.")
 	}
 }
+
+func (m *Migrator) rollbackMigrations(migrations []Migration) bool {
+	runed := false
+	for _, migration := range migrations {
+		console.Warning("rollback " + migration.Migration)
+		mfile := getMigrationFile(migration.Migration)
+		if mfile.Down != nil {
+			mfile.Down(m.GMigrator, database.SQLDB)
+		}
+
+		runed = true
+
+		m.DB.Delete(&migration)
+
+		console.Success("finish " + mfile.FileName)
+	}
+	return runed
+}
+
+func (m *Migrator) Rollback() {
+	lastMigration := Migration{}
+	m.DB.Order("id desc").First(&lastMigration)
+	migrations := []Migration{}
+	m.DB.Where("batch", lastMigration.Batch).Order("id desc").Find(&migrations)
+	if !m.rollbackMigrations(migrations) {
+		console.Success("[migrations] table is empty, nothing to rollback.")
+	}
+}
