@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"gohub/app/cmd"
+	"gohub/app/cmd/make"
 	"gohub/bootstrap"
 	bstConfig "gohub/config"
 	"gohub/pkg/config"
@@ -33,6 +34,7 @@ func main() {
 	rootCmd.AddCommand(
 		cmd.CmdServe,
 		cmd.CmdKey,
+		make.CmdMake,
 	)
 
 	cmd.RegisterDefaultCmd(rootCmd, cmd.CmdServe)
