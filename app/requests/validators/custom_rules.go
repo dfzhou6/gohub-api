@@ -65,4 +65,20 @@ func init() {
 		}
 		return nil
 	})
+
+	govalidator.AddCustomRule("exists", func(field, rule, message string, value interface{}) error {
+		rng := strings.Split(strings.TrimPrefix(rule, "exists:"), ",")
+		tableName := rng[0]
+		dbField := rng[1]
+		reqValue := value.(string)
+		var count int64
+		database.DB.Table(tableName).Where(dbField, reqValue).Count(&count)
+		if count == 0 {
+			if message != "" {
+				return errors.New(message)
+			}
+			return fmt.Errorf("%v 不存在", reqValue)
+		}
+		return nil
+	})
 }

@@ -35,6 +35,16 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			cateGroup.DELETE("/:id", middlewares.AuthJWT(), cateCtrl.Delete)
 		}
 
+		topicCtrl := new(v1Ctrl.TopicsController)
+		topicGroup := v1.Group("/topics")
+		{
+			topicGroup.GET("", topicCtrl.Index)
+			topicGroup.POST("", middlewares.AuthJWT(), topicCtrl.Store)
+			topicGroup.PUT("/:id", middlewares.AuthJWT(), topicCtrl.Update)
+			topicGroup.DELETE("/:id", middlewares.AuthJWT(), topicCtrl.Delete)
+			topicGroup.GET("/:id", topicCtrl.Show)
+		}
+
 		authGroup := v1.Group("auth")
 		authGroup.Use(middlewares.LimitIP("200-H"))
 		{
