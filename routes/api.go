@@ -1,6 +1,7 @@
 package routes
 
 import (
+	v1Ctrl "gohub/app/http/controllers/api/v1"
 	"gohub/app/http/controllers/api/v1/auth"
 	"gohub/app/http/middlewares"
 	"net/http"
@@ -17,6 +18,9 @@ func RegisterAPIRoutes(r *gin.Engine) {
 				"Hello": "World",
 			})
 		})
+
+		userCtrl := new(v1Ctrl.UsersController)
+		v1.GET("/user", middlewares.AuthJWT(), userCtrl.CurrentUser)
 
 		authGroup := v1.Group("auth")
 		authGroup.Use(middlewares.LimitIP("200-H"))
