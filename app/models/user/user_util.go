@@ -36,3 +36,8 @@ func GetByEmail(email string) (user User) {
 	database.DB.Where("email", email).First(&user)
 	return
 }
+
+func All() (users []User) {
+	database.DB.Find(&users)
+	return
+}

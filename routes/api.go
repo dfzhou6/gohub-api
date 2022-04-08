@@ -21,6 +21,10 @@ func RegisterAPIRoutes(r *gin.Engine) {
 
 		userCtrl := new(v1Ctrl.UsersController)
 		v1.GET("/user", middlewares.AuthJWT(), userCtrl.CurrentUser)
+		userGroup := v1.Group("/users")
+		{
+			userGroup.GET("", userCtrl.Index)
+		}
 
 		authGroup := v1.Group("auth")
 		authGroup.Use(middlewares.LimitIP("200-H"))
