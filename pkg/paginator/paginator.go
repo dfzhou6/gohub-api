@@ -49,21 +49,21 @@ func (p Paginator) getPageLink(page int) string {
 	)
 }
 
-func (p Paginator) getNextPageUrl() string {
+func (p *Paginator) getNextPageUrl() string {
 	if p.TotalPage > p.Page {
 		return p.getPageLink(p.Page + 1)
 	}
 	return ""
 }
 
-func (p Paginator) getPrePageUrl() string {
+func (p *Paginator) getPrePageUrl() string {
 	if p.Page <= 1 || p.Page > p.TotalPage {
 		return ""
 	}
 	return p.getPageLink(p.Page - 1)
 }
 
-func (p Paginator) formatBaseUrl(baseUrl string) string {
+func (p *Paginator) formatBaseUrl(baseUrl string) string {
 	if strings.Contains(baseUrl, "?") {
 		baseUrl = baseUrl + "&" + config.Get("paging.url_query_page") + "="
 	} else {
@@ -72,7 +72,7 @@ func (p Paginator) formatBaseUrl(baseUrl string) string {
 	return baseUrl
 }
 
-func (p Paginator) getTotalPage() int {
+func (p *Paginator) getTotalPage() int {
 	if p.TotalCount == 0 {
 		return 0
 	}
@@ -83,7 +83,7 @@ func (p Paginator) getTotalPage() int {
 	return int(nums)
 }
 
-func (p Paginator) getTotalCount() int64 {
+func (p *Paginator) getTotalCount() int64 {
 	var count int64
 	if err := p.query.Count(&count).Error; err != nil {
 		return 0
@@ -91,7 +91,7 @@ func (p Paginator) getTotalCount() int64 {
 	return count
 }
 
-func (p Paginator) getCurrentPage() int {
+func (p *Paginator) getCurrentPage() int {
 	page := cast.ToInt(p.ctx.Query(config.Get("paging.url_query_page")))
 	if page < 0 {
 		page = 1
@@ -105,7 +105,7 @@ func (p Paginator) getCurrentPage() int {
 	return page
 }
 
-func (p Paginator) getPerPage(perPage int) int {
+func (p *Paginator) getPerPage(perPage int) int {
 	queryPerPage := p.ctx.Query(config.Get("paging.url_query_per_page"))
 	if len(queryPerPage) > 0 {
 		perPage = cast.ToInt(queryPerPage)
@@ -142,7 +142,7 @@ func Paginate(c *gin.Context, db *gorm.DB, data interface{}, baseUrl string, per
 		Order(p.Sort + " " + p.Order).
 		Limit(p.PerPage).
 		Offset(p.Offset).
-		Find(&data).
+		Find(data).
 		Error
 
 	if err != nil {
