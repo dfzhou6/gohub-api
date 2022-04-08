@@ -32,6 +32,7 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			cateGroup.GET("", cateCtrl.Index)
 			cateGroup.POST("", middlewares.AuthJWT(), cateCtrl.Store)
 			cateGroup.PUT("/:id", middlewares.AuthJWT(), cateCtrl.Update)
+			cateGroup.DELETE("/:id", middlewares.AuthJWT(), cateCtrl.Delete)
 		}
 
 		authGroup := v1.Group("auth")
