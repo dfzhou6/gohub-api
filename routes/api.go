@@ -45,6 +45,12 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			topicGroup.GET("/:id", topicCtrl.Show)
 		}
 
+		linkCtrl := new(v1Ctrl.LinksController)
+		linkGroup := v1.Group("/links")
+		{
+			linkGroup.GET("", linkCtrl.Index)
+		}
+
 		authGroup := v1.Group("auth")
 		authGroup.Use(middlewares.LimitIP("200-H"))
 		{
