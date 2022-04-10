@@ -28,6 +28,7 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			userGroup.PUT("/email", middlewares.AuthJWT(), userCtrl.UpdateEmail)
 			userGroup.PUT("/phone", middlewares.AuthJWT(), userCtrl.UpdatePhone)
 			userGroup.PUT("/password", middlewares.AuthJWT(), userCtrl.UpdatePassword)
+			userGroup.PUT("/avatar", middlewares.AuthJWT(), userCtrl.UpdateAvatar)
 		}
 
 		cateCtrl := new(v1Ctrl.CategoriesController)
