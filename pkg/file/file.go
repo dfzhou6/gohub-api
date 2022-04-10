@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/disintegration/imaging"
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,7 +48,26 @@ func SaveUploadAvatar(c *gin.Context, file *multipart.FileHeader) (string, error
 	if err := c.SaveUploadedFile(file, avatarPath); err != nil {
 		return avatar, err
 	}
-	return avatarPath, nil
+
+	img, err := imaging.Open(avatarPath, imaging.AutoOrientation(true))
+	if err != nil {
+		return avatar, nil
+	}
+
+	resizeAvatar := imaging.Thumbnail(img, 256, 256, imaging.Lanczos)
+	resizeAvatarName := randomNameFromUploadFile(file)
+	resizeAvatarPath := publicPath + dirName + resizeAvatarName
+	err = imaging.Save(resizeAvatar, resizeAvatarPath)
+	if err != nil {
+		return avatar, err
+	}
+
+	err = os.Remove(avatarPath)
+	if err != nil {
+		return avatar, err
+	}
+
+	return resizeAvatarPath, nil
 }
 
 func randomNameFromUploadFile(file *multipart.FileHeader) string {
